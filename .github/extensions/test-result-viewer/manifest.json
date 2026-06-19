@@ -1,0 +1,41 @@
+{
+  "name": "test-result-viewer",
+  "displayName": "Test Results",
+  "description": "Displays TRX test result files with summary metrics, filtering, and failure details.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "canvas",
+  "entrypoint": "extension.mjs",
+  "canvases": [
+    {
+      "id": "trx-results-viewer",
+      "displayName": "Test Results",
+      "description": "Displays TRX test result files with summary metrics, filtering, and failure details.",
+      "input": {
+        "filePath": {
+          "type": "string",
+          "description": "Workspace-relative path to a .trx file."
+        }
+      },
+      "actions": [
+        {
+          "name": "list_trx_files",
+          "description": "List TRX files found under the current workspace."
+        },
+        {
+          "name": "load_trx_file",
+          "description": "Parse a workspace-relative TRX file and return its summary and test results."
+        }
+      ]
+    }
+  ],
+  "activation": {
+    "events": [
+      "onPostToolUse"
+    ],
+    "commandPatterns": [
+      "dotnet test",
+      "test"
+    ]
+  }
+}
