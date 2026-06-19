@@ -2,7 +2,7 @@
 
 A GitHub Copilot canvas app extension for viewing C# test results produced in TRX format.
 
-The extension registers a **Test Results** canvas (`trx-results-viewer`) that scans the current workspace for `.trx` files, parses TRX test run output, and shows a focused test ledger with summary counts, filtering, search, durations, host names, categories, failure messages, stack traces, and captured output.
+The extension registers a **Test Results** canvas (`test-result-viewer`) that scans the current workspace for `.trx` files, parses TRX test run output, and shows a focused test ledger with summary counts, filtering, search, durations, host names, categories, failure messages, stack traces, and captured output.
 
 ## Features
 
