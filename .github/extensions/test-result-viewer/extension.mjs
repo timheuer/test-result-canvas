@@ -306,6 +306,13 @@ function renderHtml(initialFilePath = "") {
   --green: var(--true-color-green, #1a7f37);
   --red: var(--true-color-red, #cf222e);
   --yellow: var(--true-color-yellow, #9a6700);
+  --green-bg: color-mix(in srgb, var(--green) 12%, transparent);
+  --green-border: color-mix(in srgb, var(--green) 42%, var(--border));
+  --red-bg: color-mix(in srgb, var(--red) 12%, transparent);
+  --red-border: color-mix(in srgb, var(--red) 42%, var(--border));
+  --yellow-bg: color-mix(in srgb, var(--yellow) 14%, transparent);
+  --yellow-border: color-mix(in srgb, var(--yellow) 42%, var(--border));
+  --focus-bg: color-mix(in srgb, var(--focus) 10%, transparent);
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -341,19 +348,19 @@ button, select, input {
 }
 .header {
   border-bottom: 1px solid var(--border);
-  padding: 16px 20px;
+  padding: 10px 20px 12px;
 }
 .title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 h1 {
   margin: 0;
-  font-size: var(--text-title-large, 24px);
-  line-height: var(--leading-title-large, 32px);
+  font-size: var(--text-title-medium, 20px);
+  line-height: var(--leading-title-medium, 28px);
 }
 .muted {
   color: var(--text-muted);
@@ -361,7 +368,7 @@ h1 {
 .toolbar {
   display: grid;
   grid-template-columns: minmax(160px, 1fr) auto auto;
-  gap: 8px;
+  gap: 6px;
 }
 .select, .search {
   width: 100%;
@@ -369,7 +376,7 @@ h1 {
   border-radius: 8px;
   background: var(--surface);
   color: var(--text);
-  padding: 8px 10px;
+  padding: 6px 10px;
 }
 .button {
   border: 1px solid var(--border);
@@ -377,7 +384,7 @@ h1 {
   background: var(--surface-muted);
   color: var(--text);
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 6px 12px;
 }
 .button:hover {
   background: var(--surface-hover);
@@ -413,6 +420,27 @@ h1 {
   height: 86px;
   max-height: 86px;
   min-height: 86px;
+  overflow: hidden;
+  position: relative;
+}
+.summary .card::before {
+  background: var(--focus);
+  content: "";
+  height: 4px;
+  inset: 0 0 auto;
+  opacity: 0;
+  position: absolute;
+  transition: opacity .12s ease;
+}
+.summary .card.filter-Passed::before { background: var(--green); }
+.summary .card.filter-Failed::before { background: var(--red); }
+.summary .card.filter-NotExecuted::before { background: var(--yellow); }
+.summary .card.active::before {
+  opacity: 1;
+}
+.summary .stat-card {
+  background: var(--surface);
+  cursor: default;
 }
 .card.button:hover {
   background: var(--surface-muted);
@@ -420,9 +448,24 @@ h1 {
   box-shadow: inset 0 0 0 1px var(--focus);
 }
 .card.button.active {
-  background: var(--surface-muted);
+  background: var(--focus-bg);
   border-color: var(--focus);
   box-shadow: inset 0 0 0 1px var(--focus);
+}
+.card.button.active.filter-Passed {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  box-shadow: inset 0 0 0 1px var(--green-border);
+}
+.card.button.active.filter-Failed {
+  background: var(--red-bg);
+  border-color: var(--red-border);
+  box-shadow: inset 0 0 0 1px var(--red-border);
+}
+.card.button.active.filter-NotExecuted {
+  background: var(--yellow-bg);
+  border-color: var(--yellow-border);
+  box-shadow: inset 0 0 0 1px var(--yellow-border);
 }
 .metric {
   font-size: 28px;
@@ -445,15 +488,20 @@ h1 {
 }
 .ledger-header {
   align-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-muted);
   color: var(--text-muted);
   display: grid;
   font-size: 12px;
   font-weight: var(--font-weight-semibold, 600);
   gap: 12px;
-  grid-template-columns: minmax(220px, 1fr) minmax(120px, 18%) 92px 112px;
+  grid-template-columns: 4px minmax(220px, 1fr) minmax(120px, 18%) 92px;
   letter-spacing: .04em;
-  padding: 0 14px 4px 22px;
+  padding: 2px 14px 8px 0;
+  position: sticky;
+  top: 0;
   text-transform: uppercase;
+  z-index: 2;
 }
 .row {
   background: var(--surface);
@@ -462,7 +510,7 @@ h1 {
   cursor: pointer;
   overflow: hidden;
   position: relative;
-  transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease;
+  transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease;
 }
 .row:hover {
   background: var(--surface-hover);
@@ -480,7 +528,7 @@ h1 {
   align-items: center;
   display: grid;
   gap: 12px;
-  grid-template-columns: 4px minmax(220px, 1fr) minmax(120px, 18%) 92px 112px;
+  grid-template-columns: 4px minmax(220px, 1fr) minmax(120px, 18%) 92px;
   padding: 12px 14px 12px 0;
 }
 .status-rail {
@@ -497,6 +545,14 @@ h1 {
 .row-name {
   font-weight: var(--font-weight-semibold, 600);
   overflow-wrap: anywhere;
+}
+.row-message {
+  color: var(--red);
+  font-size: 12px;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .row-class {
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace);
@@ -524,8 +580,21 @@ h1 {
   line-height: 16px;
   padding: 2px 8px;
 }
-.pill.Passed { color: var(--green); }
-.pill.Failed, .pill.Error, .pill.Timeout { color: var(--red); }
+.pill.Passed {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  color: var(--green);
+}
+.pill.Failed, .pill.Error, .pill.Timeout {
+  background: var(--red-bg);
+  border-color: var(--red-border);
+  color: var(--red);
+}
+.pill.NotExecuted {
+  background: var(--yellow-bg);
+  border-color: var(--yellow-border);
+  color: var(--yellow);
+}
 .drawer {
   border-top: 1px solid var(--border-muted);
   display: grid;
@@ -553,10 +622,24 @@ h1 {
   align-items: center;
   color: var(--text-muted);
   display: flex;
+  flex-direction: column;
+  gap: 12px;
   justify-content: center;
   min-height: 240px;
   padding: 32px;
   text-align: center;
+}
+.empty-action {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px 12px;
+}
+.empty-action:hover {
+  background: var(--surface-hover);
+  border-color: var(--focus);
 }
 .tabs {
   display: flex;
@@ -602,7 +685,7 @@ pre {
   .row-main, .drawer {
     grid-template-columns: 4px minmax(0, 1fr);
   }
-  .row-outcome, .row-duration, .row-computer {
+  .row-outcome, .row-duration {
     grid-column: 2;
   }
   .drawer {
@@ -637,6 +720,7 @@ pre {
 <script>
 const initialFilePath = ${JSON.stringify(initialFilePath)};
 let state = { files: [], data: null, selectedIndex: 0, filter: "all", search: "" };
+let searchTimer = 0;
 
 const escapeHtml = (value = "") => String(value)
   .replace(/&/g, "&amp;")
@@ -652,6 +736,10 @@ function formatDuration(ms = 0) {
   if (seconds < 60) return seconds.toFixed(seconds >= 10 ? 1 : 2) + " s";
   const minutes = Math.floor(seconds / 60);
   return minutes + "m " + Math.round(seconds % 60) + "s";
+}
+
+function displayOutcome(outcome = "") {
+  return outcome === "NotExecuted" ? "Skipped" : outcome;
 }
 
 function setMessage(message, isError = false) {
@@ -706,9 +794,18 @@ function filteredResults() {
   const query = state.search.trim().toLowerCase();
   return state.data.results.filter((result) => {
     const matchesFilter = state.filter === "all" || result.outcome === state.filter;
-    const haystack = [result.name, result.className, result.methodName, result.outcome, result.errorMessage, result.categories.join(" ")].join(" ").toLowerCase();
+    const haystack = [result.name, result.className, result.methodName, result.outcome, displayOutcome(result.outcome), result.errorMessage, result.categories.join(" ")].join(" ").toLowerCase();
     return matchesFilter && (!query || haystack.includes(query));
   });
+}
+
+function filterLabel(filter) {
+  return {
+    all: "all results",
+    Passed: "passed tests",
+    Failed: "failed tests",
+    NotExecuted: "skipped tests",
+  }[filter] || filter;
 }
 
 function renderSummary() {
@@ -720,33 +817,44 @@ function renderSummary() {
     ["Skipped", counts.notExecuted, "skipped", "NotExecuted"],
     ["Pass rate", counts.passRate + "%", "passed", ""],
   ].map(([label, value, css, filter]) => {
+    if (!filter) {
+      return '<div class="card stat-card" aria-label="' + escapeHtml(label + ": " + value) + '"><div class="metric ' + css + '">' + value + '</div><div class="muted">' + label + '</div></div>';
+    }
+
     const active = filter && state.filter === filter;
-    const filterAttrs = filter ? ' data-filter="' + filter + '" aria-pressed="' + active + '"' : ' aria-disabled="true"';
-    return '<button class="card button ' + (active ? "active" : "") + '" type="button"' + filterAttrs + '><div class="metric ' + css + '">' + value + '</div><div class="muted">' + label + '</div></button>';
+    const filterAttrs = ' data-filter="' + filter + '" aria-pressed="' + active + '"';
+    const filterClass = filter ? " filter-" + filter : "";
+    return '<button class="card button ' + (active ? "active" : "") + filterClass + '" type="button"' + filterAttrs + '><div class="metric ' + css + '">' + value + '</div><div class="muted">' + label + '</div></button>';
   }).join("");
 }
 
 function renderList(results) {
   const container = document.getElementById("results");
   if (!results.length) {
-    container.innerHTML = '<div class="empty">No matching test results.</div>';
+    const hasSearch = Boolean(state.search.trim());
+    const scopedMessage = state.filter === "all"
+      ? (hasSearch ? "No test results match your search." : "No test results found.")
+      : (hasSearch ? "No " + filterLabel(state.filter) + " match your search." : "No " + filterLabel(state.filter) + " in this run.");
+    const action = state.filter === "all" && !hasSearch ? "" : '<button class="empty-action" type="button" data-clear-filter>Show all results</button>';
+    container.innerHTML = '<div class="empty"><div>' + escapeHtml(scopedMessage) + '</div>' + action + '</div>';
     return;
   }
   state.selectedIndex = Math.min(state.selectedIndex, results.length - 1);
   container.innerHTML =
-    '<div class="ledger-header"><span>Test</span><span>Outcome</span><span>Duration</span><span>Host</span></div>' +
+    '<div class="ledger-header"><span></span><span>Test</span><span>Outcome</span><span>Duration</span></div>' +
     results.map((result, index) => {
       const active = index === state.selectedIndex;
-      return '<article class="row ' + (active ? "active" : "") + '" data-index="' + index + '" role="button" tabindex="0" aria-expanded="' + active + '">' +
+      const outcome = displayOutcome(result.outcome);
+      const message = result.errorMessage ? '<div class="row-message">' + escapeHtml(result.errorMessage) + '</div>' : "";
+      return '<div class="row ' + (active ? "active" : "") + '" data-index="' + index + '" role="button" tabindex="0" aria-expanded="' + active + '">' +
         '<div class="row-main">' +
         '<span class="status-rail ' + escapeHtml(result.outcome) + '"></span>' +
-        '<div class="test-title"><div class="row-name">' + escapeHtml(result.name) + '</div><div class="row-class muted">' + escapeHtml(result.className || "n/a") + '</div></div>' +
-        '<div class="row-outcome"><span class="pill ' + escapeHtml(result.outcome) + '">' + escapeHtml(result.outcome) + '</span></div>' +
+        '<div class="test-title"><div class="row-name">' + escapeHtml(result.name) + '</div>' + message + '<div class="row-class muted">' + escapeHtml(result.className || "n/a") + '</div></div>' +
+        '<div class="row-outcome"><span class="pill ' + escapeHtml(result.outcome) + '">' + escapeHtml(outcome) + '</span></div>' +
         '<div class="row-duration muted">' + formatDuration(result.durationMs) + '</div>' +
-        '<div class="row-computer muted">' + escapeHtml(result.computerName || "n/a") + '</div>' +
         '</div>' +
         (active ? renderDetails(result) : "") +
-        '</article>';
+        '</div>';
     }).join("");
 }
 
@@ -762,7 +870,7 @@ function renderDetails(result) {
   return '<div class="drawer">' +
     '<div><h2>' + escapeHtml(result.name) + '</h2>' +
     '<div class="kv">' +
-    '<strong>Outcome</strong><span><span class="pill ' + escapeHtml(result.outcome) + '">' + escapeHtml(result.outcome) + '</span></span>' +
+    '<strong>Outcome</strong><span><span class="pill ' + escapeHtml(result.outcome) + '">' + escapeHtml(displayOutcome(result.outcome)) + '</span></span>' +
     '<strong>Duration</strong><span class="code">' + formatDuration(result.durationMs) + '</span>' +
     '<strong>Class</strong><span class="code">' + escapeHtml(result.className || "n/a") + '</span>' +
     '<strong>Method</strong><span class="code">' + escapeHtml(result.methodName || "n/a") + '</span>' +
@@ -773,10 +881,15 @@ function renderDetails(result) {
     '</div>';
 }
 
-function render() {
+function render(options = {}) {
   if (!state.data) return;
   renderSummary();
   renderList(filteredResults());
+  if (Number.isInteger(options.focusIndex)) {
+    requestAnimationFrame(() => {
+      document.querySelector('[data-index="' + options.focusIndex + '"]')?.focus();
+    });
+  }
 }
 
 document.getElementById("files").addEventListener("change", (event) => {
@@ -787,8 +900,11 @@ document.getElementById("refresh").addEventListener("click", () => {
 });
 document.getElementById("search").addEventListener("input", (event) => {
   state.search = event.target.value;
-  state.selectedIndex = 0;
-  render();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    state.selectedIndex = 0;
+    render();
+  }, 160);
 });
 document.getElementById("summary").addEventListener("click", (event) => {
   const button = event.target.closest("[data-filter]");
@@ -799,10 +915,20 @@ document.getElementById("summary").addEventListener("click", (event) => {
   render();
 });
 document.getElementById("results").addEventListener("click", (event) => {
+  const clearFilter = event.target.closest("[data-clear-filter]");
+  if (clearFilter) {
+    state.filter = "all";
+    state.search = "";
+    state.selectedIndex = 0;
+    document.getElementById("search").value = "";
+    render();
+    return;
+  }
+
   const row = event.target.closest("[data-index]");
   if (!row) return;
   state.selectedIndex = Number(row.dataset.index);
-  render();
+  render({ focusIndex: state.selectedIndex });
 });
 document.getElementById("results").addEventListener("keydown", (event) => {
   if (event.key !== "Enter" && event.key !== " ") return;
@@ -810,7 +936,7 @@ document.getElementById("results").addEventListener("keydown", (event) => {
   if (!row) return;
   event.preventDefault();
   state.selectedIndex = Number(row.dataset.index);
-  render();
+  render({ focusIndex: state.selectedIndex });
 });
 document.getElementById("upload").addEventListener("change", async (event) => {
   const file = event.target.files[0];
@@ -900,7 +1026,7 @@ copilotSession = await joinSession({
         createCanvas({
             id: "trx-results-viewer",
             displayName: "Test Results",
-            description: "Displays TRX test result files with summary metrics, filtering, and failure details.",
+            description: "Displays Visual Studio TRX test result files with summary metrics, filtering, and failure details.",
             inputSchema: filePathSchema,
             actions: [
                 {
